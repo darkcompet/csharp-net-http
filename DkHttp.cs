@@ -22,20 +22,23 @@ namespace Tool.Compet.Http {
 		}
 
 		/// Set default request header for all requests.
-		public void SetDefaultRequestHeader(string key, string value) {
+		public DkHttp SetDefaultRequestHeader(string key, string value) {
 			httpClient.DefaultRequestHeaders.Add(key, value);
+			return this;
 		}
 
 		/// Set default request header for all requests.
 		/// @param authorization For eg,. "Bearer Aksdtkasl2910dks"
-		public void SetDefaultAuthorization(string authorization) {
-			httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(authorization);
+		public DkHttp SetDefaultAuthorization(string schema, string token) {
+			httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(schema, token);
+			return this;
 		}
 
 		/// Set request header for each request.
-		public void SetRequestHeader(string key, string value) {
+		public DkHttp SetRequestHeader(string key, string value) {
 			// Use `TryAdd` since `Add` will throw exception if the key exists.
 			this.requestHeaders.TryAdd(key, value);
+			return this;
 		}
 
 		/// Convenient method for sending GET request.
