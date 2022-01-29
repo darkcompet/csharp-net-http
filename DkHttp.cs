@@ -39,7 +39,7 @@ namespace Tool.Compet.Http {
 		}
 
 		/// Convenient method for sending GET request.
-		public async Task<T> Get<T>(string url) where T : ApiResponse {
+		public async Task<T> Get<T>(string url) where T : TheApiResponse {
 			// Perform try/catch for whole process
 			try {
 				var result = await httpClient.GetAsync(url);
@@ -48,12 +48,12 @@ namespace Tool.Compet.Http {
 				// To check with larger range: !result.IsSuccessStatusCode
 				if (result.StatusCode != HttpStatusCode.OK) {
 					if (DkBuildConfig.DEBUG) {
-						DkLogs.Warning(this, "GET failed ! responseBody", responseBody);
+						DkLogs.Warning(this, $"NG responseBody when GET, reason: {result.ReasonPhrase}");
 					}
 
 					return DkObjects.NewInstace<T>().AlsoDk(res => {
 						res.code = ((int)result.StatusCode);
-						res.message = responseBody;
+						res.message = result.ReasonPhrase;
 					});
 				}
 
@@ -74,7 +74,7 @@ namespace Tool.Compet.Http {
 
 		/// Convenient method for sending POST request.
 		/// @param `body`: Can be serialized with Json.
-		public async Task<T> Post<T>(string url, object body) where T : ApiResponse {
+		public async Task<T> Post<T>(string url, object body) where T : TheApiResponse {
 			// Perform try/catch for whole process
 			try {
 				var response = await httpClient.PostAsJsonAsync(url, body);
@@ -83,12 +83,12 @@ namespace Tool.Compet.Http {
 				// To check with larger range: !result.IsSuccessStatusCode
 				if (response.StatusCode != HttpStatusCode.OK) {
 					if (DkBuildConfig.DEBUG) {
-						DkLogs.Warning(this, "POST failed ! responseBody", responseBody);
+						DkLogs.Warning(this, $"NG responseBody when POST, reason: {response.ReasonPhrase}");
 					}
 
 					return DkObjects.NewInstace<T>().AlsoDk(res => {
 						res.code = ((int)response.StatusCode);
-						res.message = responseBody;
+						res.message = response.ReasonPhrase;
 					});
 				}
 
@@ -112,7 +112,7 @@ namespace Tool.Compet.Http {
 		private async Task<T> Send<T>(
 			HttpMethod method, // HttpMethod.Get, HttpMethod.Post,...
 			string url // https://kilobytes.com.vn
-		) where T : ApiResponse {
+		) where T : TheApiResponse {
 			// Perform try/catch for whole process
 			try {
 				// Make request data
