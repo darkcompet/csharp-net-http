@@ -42,7 +42,7 @@ namespace Tool.Compet.Http {
 		}
 
 		/// Convenient method for sending GET request.
-		public async Task<T> Get<T>(string url) where T : TheApiResponse {
+		public async Task<T> Get<T>(string url) where T : DkApiResponse {
 			// Perform try/catch for whole process
 			try {
 				var result = await httpClient.GetAsync(url);
@@ -69,7 +69,7 @@ namespace Tool.Compet.Http {
 				}
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
-					res.code = ApiCode.UNKNOWN;
+					res.code = -1;
 					res.message = e.Message;
 				});
 			}
@@ -77,7 +77,7 @@ namespace Tool.Compet.Http {
 
 		/// Convenient method for sending POST request.
 		/// @param `body`: Can be serialized with Json.
-		public async Task<T> Post<T>(string url, object body) where T : TheApiResponse {
+		public async Task<T> Post<T>(string url, object body) where T : DkApiResponse {
 			// Perform try/catch for whole process
 			try {
 				var response = await httpClient.PostAsJsonAsync(url, body);
@@ -104,7 +104,7 @@ namespace Tool.Compet.Http {
 				}
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
-					res.code = ApiCode.UNKNOWN;
+					res.code = -1;
 					res.message = e.Message;
 				});
 			}
@@ -115,7 +115,7 @@ namespace Tool.Compet.Http {
 		private async Task<T> Send<T>(
 			HttpMethod method, // HttpMethod.Get, HttpMethod.Post,...
 			string url // https://kilobytes.com.vn
-		) where T : TheApiResponse {
+		) where T : DkApiResponse {
 			// Perform try/catch for whole process
 			try {
 				// Make request data
@@ -158,7 +158,7 @@ namespace Tool.Compet.Http {
 				}
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
-					res.code = ApiCode.UNKNOWN;
+					res.code = -1;
 					res.message = e.Message;
 				});
 			}
