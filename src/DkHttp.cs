@@ -10,8 +10,6 @@ namespace Tool.Compet.Http {
 		/// multiple requests instead of making new instance per request.
 		private readonly HttpClient httpClient;
 
-		private readonly Dictionary<string, string> requestHeaders = new();
-
 		public DkHttp() {
 			this.httpClient = new HttpClient();
 
@@ -28,16 +26,10 @@ namespace Tool.Compet.Http {
 		}
 
 		/// Set default request header for all requests.
-		/// @param authorization For eg,. "Bearer Aksdtkasl2910dks"
+		/// @param schema: For eg,. "Bearer"
+		/// @param token: For eg,. "Aksdtkasl2910dks"
 		public DkHttp SetDefaultAuthorization(string schema, string token) {
 			httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(schema, token);
-			return this;
-		}
-
-		/// Set request header for each request.
-		public DkHttp SetRequestHeader(string key, string value) {
-			// Use `TryAdd` since `Add` will throw exception if the key exists.
-			this.requestHeaders.TryAdd(key, value);
 			return this;
 		}
 
