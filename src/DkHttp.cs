@@ -80,7 +80,15 @@ namespace Tool.Compet.Http {
 		public async Task<T> Post<T>(string url, object body) where T : DkApiResponse {
 			// Perform try/catch for whole process
 			try {
-				var response = await httpClient.PostAsJsonAsync(url, body);
+				var json = DkJsons.Obj2Json(body);
+				// Other content types:
+				// - StreamContent
+				// - ByteArrayContent (StringContent, FormUrlEncodedContent)
+				// - MultipartContent (MultipartFormDataContent)
+				var stringContent = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+				// Commented out since `PostAsJsonAsync()` only work in ASP.NET environment.
+				// var response = await httpClient.PostAsJsonAsync(url, body);
+				var response = await httpClient.PostAsync(url, stringContent);
 				var responseBody = await response.Content.ReadAsStringAsync();
 
 				// To check with larger range: !result.IsSuccessStatusCode
@@ -99,9 +107,7 @@ namespace Tool.Compet.Http {
 				return DkJsons.Json2Obj<T>(responseBody!)!;
 			}
 			catch (Exception e) {
-				if (DkBuildConfig.DEBUG) {
-					DkLogs.Warning(this, $"Error when POST ! error: {e.Message}");
-				}
+				if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when POST ! error: {e.Message}"); }
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.code = -1;
