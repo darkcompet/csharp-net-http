@@ -61,7 +61,7 @@ namespace Tool.Compet.Http {
 				}
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
-					res.code = -1;
+					res.code = 0;
 					res.message = e.Message;
 				});
 			}
@@ -102,7 +102,7 @@ namespace Tool.Compet.Http {
 				if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when POST ! error: {e.Message}"); }
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
-					res.code = -1;
+					res.code = 0;
 					res.message = e.Message;
 				});
 			}
@@ -156,7 +156,7 @@ namespace Tool.Compet.Http {
 				}
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
-					res.code = -1;
+					res.code = 0;
 					res.message = e.Message;
 				});
 			}
