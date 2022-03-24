@@ -47,7 +47,7 @@ namespace Tool.Compet.Http {
 					}
 
 					return DkObjects.NewInstace<T>().AlsoDk(res => {
-						res.code = ((int)result.StatusCode);
+						res.status = ((int)result.StatusCode);
 						res.message = result.ReasonPhrase;
 					});
 				}
@@ -61,7 +61,7 @@ namespace Tool.Compet.Http {
 				}
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
-					res.code = 0;
+					res.status = 0;
 					res.message = e.Message;
 				});
 			}
@@ -90,7 +90,7 @@ namespace Tool.Compet.Http {
 					}
 
 					return DkObjects.NewInstace<T>().AlsoDk(res => {
-						res.code = ((int)response.StatusCode);
+						res.status = ((int)response.StatusCode);
 						res.message = response.ReasonPhrase;
 					});
 				}
@@ -102,7 +102,7 @@ namespace Tool.Compet.Http {
 				if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when POST ! error: {e.Message}"); }
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
-					res.code = 0;
+					res.status = 0;
 					res.message = e.Message;
 				});
 			}
@@ -142,7 +142,7 @@ namespace Tool.Compet.Http {
 					}
 
 					return DkObjects.NewInstace<T>().AlsoDk(res => {
-						res.code = ((int)response.StatusCode);
+						res.status = ((int)response.StatusCode);
 						res.message = responseBody;
 					});
 				}
@@ -156,7 +156,7 @@ namespace Tool.Compet.Http {
 				}
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
-					res.code = 0;
+					res.status = 0;
 					res.message = e.Message;
 				});
 			}
