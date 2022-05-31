@@ -5,12 +5,12 @@ using Tool.Compet.Json;
 using Tool.Compet.Log;
 
 namespace Tool.Compet.Http {
-	public class DkHttp {
+	public class DkHttpClient {
 		/// HttpClient is designed for concurrency, so we just use 1 instance of it on
 		/// multiple requests instead of making new instance per request.
 		private readonly HttpClient httpClient;
 
-		public DkHttp() {
+		public DkHttpClient() {
 			this.httpClient = new HttpClient();
 
 			// Use below if we wanna change default max-concurrency (default 10)
@@ -20,16 +20,16 @@ namespace Tool.Compet.Http {
 		}
 
 		/// Set default request header for all requests.
-		public DkHttp SetDefaultRequestHeader(string key, string value) {
-			httpClient.DefaultRequestHeaders.Add(key, value);
+		public DkHttpClient SetRequestHeaderEntry(string key, string value) {
+			this.httpClient.DefaultRequestHeaders.Add(key, value);
 			return this;
 		}
 
 		/// Set default request header for all requests.
 		/// @param schema: For eg,. "Bearer"
 		/// @param token: For eg,. "Aksdtkasl2910dks"
-		public DkHttp SetDefaultAuthorization(string schema, string token) {
-			httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(schema, token);
+		public DkHttpClient SetAuthorization(string schema, string token) {
+			this.httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(schema, token);
 			return this;
 		}
 
@@ -62,7 +62,8 @@ namespace Tool.Compet.Http {
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
-					res.message = e.Message;
+					res.code = "error";
+					res.message = DkBuildConfig.DEBUG ? e.Message : "exception occured";
 				});
 			}
 		}
@@ -103,7 +104,8 @@ namespace Tool.Compet.Http {
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
-					res.message = e.Message;
+					res.code = "error";
+					res.message = DkBuildConfig.DEBUG ? e.Message : "exception occured";
 				});
 			}
 		}
@@ -157,7 +159,8 @@ namespace Tool.Compet.Http {
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
-					res.message = e.Message;
+					res.code = "error";
+					res.message = DkBuildConfig.DEBUG ? e.Message : "exception occured";
 				});
 			}
 		}
