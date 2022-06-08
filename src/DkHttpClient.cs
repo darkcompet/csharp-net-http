@@ -70,15 +70,15 @@ namespace Tool.Compet.Http {
 
 		/// Convenient method for sending POST request.
 		/// @param `body`: Can be serialized with Json.
-		public async Task<T> Post<T>(string url, object body) where T : DkApiResponse {
+		public async Task<T> Post<T>(string url, object? body = null) where T : DkApiResponse {
 			// Perform try/catch for whole process
 			try {
-				var json = DkJsons.Obj2Json(body);
+				var json = body == null ? null : DkJsons.Obj2Json(body);
 				// Other content types:
 				// - StreamContent
 				// - ByteArrayContent (StringContent, FormUrlEncodedContent)
 				// - MultipartContent (MultipartFormDataContent)
-				var stringContent = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+				var stringContent = json == null ? null : new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 				// Commented out since `PostAsJsonAsync()` only work in ASP.NET environment.
 				// var response = await httpClient.PostAsJsonAsync(url, body);
 				var response = await httpClient.PostAsync(url, stringContent);
