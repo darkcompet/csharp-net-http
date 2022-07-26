@@ -1,6 +1,6 @@
-# Http for Net
+# Http for dotnet
 
-This provides Http request for Net.
+This provides Http request for dotnet.
 
 - Features
 
