@@ -94,8 +94,8 @@ namespace Tool.Compet.Http {
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
-					res.code = "error";
-					res.message = DkBuildConfig.DEBUG ? e.Message : "exception occured";
+					res.code = "dkerror";
+					res.message = e.Message;
 				});
 			}
 		}
@@ -176,8 +176,8 @@ namespace Tool.Compet.Http {
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
-					res.code = "error";
-					res.message = DkBuildConfig.DEBUG ? e.Message : "exception occured";
+					res.code = "dkerror";
+					res.message = e.Message;
 				});
 			}
 		}
@@ -231,8 +231,8 @@ namespace Tool.Compet.Http {
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
-					res.code = "error";
-					res.message = DkBuildConfig.DEBUG ? e.Message : "exception occured";
+					res.code = "dkerror";
+					res.message = e.Message;
 				});
 			}
 		}
