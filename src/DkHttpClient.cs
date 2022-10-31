@@ -33,19 +33,15 @@ namespace Tool.Compet.Http {
 			return this;
 		}
 
-		/// Sends a GET request, and return json-decoded response.
-		/// Note that, this method requires response type as a child of `DkApiResponse`,
-		/// so we easily check status, code and message from the response.
+		/// Sends a GET request, and return json-decoded response as `DkApiResponse`-based type.
 		public async Task<T> Get<T>(string url) where T : DkApiResponse {
 			// Perform try/catch for whole process
 			try {
-				var result = await httpClient.GetAsync(url);
-				var responseBody = await result.Content.ReadAsStringAsync();
-
 				// To check with larger range: !result.IsSuccessStatusCode
+				var result = await httpClient.GetAsync(url);
 				if (result.StatusCode != HttpStatusCode.OK) {
 					if (DkBuildConfig.DEBUG) {
-						DkLogs.Warning(this, $"NG responseBody when GET, reason: {result.ReasonPhrase}");
+						DkLogs.Warning(this, $"NG response ({result.StatusCode}) when Get, reason: {result.ReasonPhrase}");
 					}
 
 					return DkObjects.NewInstace<T>().AlsoDk(res => {
@@ -55,7 +51,7 @@ namespace Tool.Compet.Http {
 				}
 
 				// Add `!` to tell compiler that body and result are non-null.
-				return DkJsons.Json2Obj<T>(responseBody!)!;
+				return (await result.Content.ReadFromJsonAsync<T>())!;
 			}
 			catch (Exception e) {
 				if (DkBuildConfig.DEBUG) {
@@ -70,53 +66,22 @@ namespace Tool.Compet.Http {
 			}
 		}
 
-		/// Sends a GET request, and just return string response.
-		/// @return Raw body if succeed. Otherwise null.
-		public async Task<string?> GetForRaw(string url) {
-			// Perform try/catch for whole process
-			try {
-				var result = await httpClient.GetAsync(url);
-				var responseBody = await result.Content.ReadAsStringAsync();
-
-				// To check with larger range: !result.IsSuccessStatusCode
-				if (result.StatusCode != HttpStatusCode.OK) {
-					if (DkBuildConfig.DEBUG) {
-						DkLogs.Warning(this, $"NG responseBody when GetForRaw, reason: {result.ReasonPhrase}");
-					}
-
-					return null;
-				}
-
-				return responseBody!;
-			}
-			catch (Exception e) {
-				if (DkBuildConfig.DEBUG) {
-					DkLogs.Warning(this, $"Error when GetForRaw ! error: {e.Message}");
-				}
-
-				return null;
-			}
-		}
-
-		/// Sends a GET request, and just return json-decoded response.
+		/// Sends a GET request, and just return json-decoded response for given type.
 		/// Take note that, returned non-null response does NOT indicate the request has succeed response.
 		/// @return Object of given type if succeed. Otherwise null.
 		public async Task<T?> GetForType<T>(string url) where T : class {
 			// Perform try/catch for whole process
 			try {
-				var result = await httpClient.GetAsync(url);
-				var responseBody = await result.Content.ReadAsStringAsync();
-
 				// To check with larger range: !result.IsSuccessStatusCode
+				var result = await httpClient.GetAsync(url);
 				if (result.StatusCode != HttpStatusCode.OK) {
 					if (DkBuildConfig.DEBUG) {
-						DkLogs.Warning(this, $"NG responseBody when GetForType, reason: {result.ReasonPhrase}");
+						DkLogs.Warning(this, $"NG response ({result.StatusCode}) when GetForType, reason: {result.ReasonPhrase}");
 					}
-
 					return null;
 				}
 
-				return DkJsons.Json2Obj<T>(responseBody!)!;
+				return await result.Content.ReadFromJsonAsync<T>();
 			}
 			catch (Exception e) {
 				if (DkBuildConfig.DEBUG) {
@@ -127,29 +92,51 @@ namespace Tool.Compet.Http {
 			}
 		}
 
-		/// Sends a POST request, and return json-decoded response.
-		/// Note that, this method requires response type as a child of `DkApiResponse`,
-		/// so we easily check status, code and message from the response.
-		///
-		/// @param `body`: Can be map, json-serialized object,...
+		/// Sends a GET request, and just response as string type.
+		/// @return Nullable body in string.
+		public async Task<string?> GetForString(string url) {
+			// Perform try/catch for whole process
+			try {
+				// To check with larger range: !result.IsSuccessStatusCode
+				var result = await httpClient.GetAsync(url);
+				if (result.StatusCode != HttpStatusCode.OK) {
+					if (DkBuildConfig.DEBUG) {
+						DkLogs.Warning(this, $"NG response ({result.StatusCode}) when GetForString, reason: {result.ReasonPhrase}");
+					}
+				}
+
+				return await result.Content.ReadAsStringAsync();
+			}
+			catch (Exception e) {
+				if (DkBuildConfig.DEBUG) {
+					DkLogs.Warning(this, $"Error when GetForString ! error: {e.Message}");
+				}
+
+				return null;
+			}
+		}
+
+		/// Sends a POST request, and return json-decoded response as `DkApiResponse`-based type.
+		/// @param body: Can be Dictionary, json-serialized object,...
 		public async Task<T> Post<T>(string url, object? body = null) where T : DkApiResponse {
 			// Perform try/catch for whole process
 			try {
 				var json = body == null ? null : DkJsons.Obj2Json(body);
+
 				// Other content types:
 				// - StreamContent
 				// - ByteArrayContent (StringContent, FormUrlEncodedContent)
 				// - MultipartContent (MultipartFormDataContent)
 				var stringContent = json == null ? null : new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-				// Commented out since `PostAsJsonAsync()` only work in ASP.NET environment.
-				// var response = await httpClient.PostAsJsonAsync(url, body);
 				var response = await httpClient.PostAsync(url, stringContent);
-				var responseBody = await response.Content.ReadAsStringAsync();
+
+				// // For ASP.NET environment:
+				// var response = await httpClient.PostAsJsonAsync(url, body);
 
 				// To check with larger range: !result.IsSuccessStatusCode
 				if (response.StatusCode != HttpStatusCode.OK) {
 					if (DkBuildConfig.DEBUG) {
-						DkLogs.Warning(this, $"NG responseBody when POST, reason: {response.ReasonPhrase}");
+						DkLogs.Warning(this, $"NG response ({response.StatusCode}) when Post, reason: {response.ReasonPhrase}");
 					}
 
 					return DkObjects.NewInstace<T>().AlsoDk(res => {
@@ -159,10 +146,10 @@ namespace Tool.Compet.Http {
 				}
 
 				// Add `!` to tell compiler that body and result are non-null.
-				return DkJsons.Json2Obj<T>(responseBody!)!;
+				return (await response.Content.ReadFromJsonAsync<T>())!;
 			}
 			catch (Exception e) {
-				if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when POST ! error: {e.Message}"); }
+				if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when Post ! error: {e.Message}"); }
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
@@ -172,69 +159,32 @@ namespace Tool.Compet.Http {
 			}
 		}
 
-		/// Sends a POST request, and just return string response.
-		/// @return Raw body if succeed. Otherwise null.
-		public async Task<string?> PostForRaw(string url, object? body = null) {
-			// Perform try/catch for whole process
-			try {
-				var json = body == null ? null : DkJsons.Obj2Json(body);
-				// Other content types:
-				// - StreamContent
-				// - ByteArrayContent (StringContent, FormUrlEncodedContent)
-				// - MultipartContent (MultipartFormDataContent)
-				var stringContent = json == null ? null : new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-				// Commented out since `PostAsJsonAsync()` only work in ASP.NET environment.
-				// var response = await httpClient.PostAsJsonAsync(url, body);
-				var response = await httpClient.PostAsync(url, stringContent);
-				var responseBody = await response.Content.ReadAsStringAsync();
-
-				// To check with larger range: !result.IsSuccessStatusCode
-				if (response.StatusCode != HttpStatusCode.OK) {
-					if (DkBuildConfig.DEBUG) {
-						DkLogs.Warning(this, $"NG responseBody when PostForRaw, reason: {response.ReasonPhrase}");
-					}
-
-					return null;
-				}
-
-				return responseBody!;
-			}
-			catch (Exception e) {
-				if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when PostForRaw ! error: {e.Message}"); }
-
-				return null;
-			}
-		}
-
-		/// Sends a POST request, and just return json-decoded response.
-		/// Take note that, returned non-null response does NOT indicate the request has succeed response.
-		/// @param `body`: Can be map, json-serialized object,...
-		/// @return Object of given type if succeed. Otherwise null.
+		/// Sends a POST request, and return json-decoded response as given type.
+		/// @param body: Can be Dictionary, json-serialized object,...
+		/// @return Nullable object in given type.
 		public async Task<T?> PostForType<T>(string url, object? body = null) where T : class {
 			// Perform try/catch for whole process
 			try {
 				var json = body == null ? null : DkJsons.Obj2Json(body);
+
 				// Other content types:
 				// - StreamContent
 				// - ByteArrayContent (StringContent, FormUrlEncodedContent)
 				// - MultipartContent (MultipartFormDataContent)
 				var stringContent = json == null ? null : new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-				// Commented out since `PostAsJsonAsync()` only work in ASP.NET environment.
-				// var response = await httpClient.PostAsJsonAsync(url, body);
 				var response = await httpClient.PostAsync(url, stringContent);
-				var responseBody = await response.Content.ReadAsStringAsync();
+
+				// // For ASP.NET environment:
+				// var response = await httpClient.PostAsJsonAsync(url, body);
 
 				// To check with larger range: !result.IsSuccessStatusCode
 				if (response.StatusCode != HttpStatusCode.OK) {
 					if (DkBuildConfig.DEBUG) {
-						DkLogs.Warning(this, $"NG responseBody when PostForType, reason: {response.ReasonPhrase}");
+						DkLogs.Warning(this, $"NG response ({response.StatusCode}) when PostForType, reason: {response.ReasonPhrase}");
 					}
-
-					return null;
 				}
 
-				// Add `!` to tell compiler that body and result are non-null.
-				return DkJsons.Json2Obj<T>(responseBody!)!;
+				return await response.Content.ReadFromJsonAsync<T>();
 			}
 			catch (Exception e) {
 				if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when PostForType ! error: {e.Message}"); }
@@ -243,9 +193,44 @@ namespace Tool.Compet.Http {
 			}
 		}
 
+		/// Sends a POST request, and return just response as string type.
+		/// @param body: Can be Dictionary, json-serialized object,...
+		public async Task<string?> PostForString(string url, object? body = null) {
+			// Perform try/catch for whole process
+			try {
+				var json = body == null ? null : DkJsons.Obj2Json(body);
+
+				// Other content types:
+				// - StreamContent
+				// - ByteArrayContent (StringContent, FormUrlEncodedContent)
+				// - MultipartContent (MultipartFormDataContent)
+				var stringContent = json == null ? null : new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+				var response = await httpClient.PostAsync(url, stringContent);
+
+				// // For ASP.NET environment:
+				// var response = await httpClient.PostAsJsonAsync(url, body);
+
+				// To check with larger range: !result.IsSuccessStatusCode
+				if (response.StatusCode != HttpStatusCode.OK) {
+					if (DkBuildConfig.DEBUG) {
+						DkLogs.Warning(this, $"NG response ({response.StatusCode}) when PostForString, reason: {response.ReasonPhrase}");
+					}
+				}
+
+				// Add `!` to tell compiler that body and result are non-null.
+				return await response.Content.ReadAsStringAsync();
+			}
+			catch (Exception e) {
+				if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when PostForString ! error: {e.Message}"); }
+
+				return null;
+			}
+		}
+
+		/// Still in development !!
 		/// This is detail implementation for sending request.
 		/// Note that, `Get(), Post()` in this class are convenient versions of this method.
-		private async Task<T> Send<T>(HttpMethod method, string url) where T : DkApiResponse {
+		private async Task<T> __Send<T>(string url, HttpMethod method) where T : DkApiResponse {
 			// Perform try/catch for whole process
 			try {
 				// Make request data
