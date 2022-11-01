@@ -51,6 +51,7 @@ namespace Tool.Compet.Http {
 				}
 
 				// Add `!` to tell compiler that body and result are non-null.
+				// Or use: return DkJsons.ToObj<T>(await result.Content.ReadAsStringAsync())!;
 				return (await result.Content.ReadFromJsonAsync<T>())!;
 			}
 			catch (Exception e) {
@@ -145,7 +146,6 @@ namespace Tool.Compet.Http {
 					});
 				}
 
-				// Add `!` to tell compiler that body and result are non-null.
 				return (await response.Content.ReadFromJsonAsync<T>())!;
 			}
 			catch (Exception e) {
@@ -217,7 +217,6 @@ namespace Tool.Compet.Http {
 					}
 				}
 
-				// Add `!` to tell compiler that body and result are non-null.
 				return await response.Content.ReadAsStringAsync();
 			}
 			catch (Exception e) {
@@ -264,7 +263,6 @@ namespace Tool.Compet.Http {
 					});
 				}
 
-				// Add `!` to tell compiler that body and result are non-null.
 				return DkJsons.Json2Obj<T>(responseBody!)!;
 			}
 			catch (Exception e) {
