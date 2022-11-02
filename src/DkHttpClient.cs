@@ -122,7 +122,7 @@ namespace Tool.Compet.Http {
 		public async Task<T> Post<T>(string url, object? body = null) where T : DkApiResponse {
 			// Perform try/catch for whole process
 			try {
-				var json = body == null ? null : DkJsons.Obj2Json(body);
+				var json = body == null ? null : DkJsons.ToJson(body);
 
 				// Other content types:
 				// - StreamContent
@@ -165,7 +165,7 @@ namespace Tool.Compet.Http {
 		public async Task<T?> PostForType<T>(string url, object? body = null) where T : class {
 			// Perform try/catch for whole process
 			try {
-				var json = body == null ? null : DkJsons.Obj2Json(body);
+				var json = body == null ? null : DkJsons.ToJson(body);
 
 				// Other content types:
 				// - StreamContent
@@ -198,7 +198,7 @@ namespace Tool.Compet.Http {
 		public async Task<string?> PostForString(string url, object? body = null) {
 			// Perform try/catch for whole process
 			try {
-				var json = body == null ? null : DkJsons.Obj2Json(body);
+				var json = body == null ? null : DkJsons.ToJson(body);
 
 				// Other content types:
 				// - StreamContent
@@ -263,7 +263,7 @@ namespace Tool.Compet.Http {
 					});
 				}
 
-				return DkJsons.Json2Obj<T>(responseBody!)!;
+				return DkJsons.ToObj<T>(responseBody!)!;
 			}
 			catch (Exception e) {
 				if (DkBuildConfig.DEBUG) {
