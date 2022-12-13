@@ -26,7 +26,7 @@ namespace Tool.Compet.Http {
 		}
 
 		/// Set default request header for all requests.
-		/// @param schema: For eg,. "Bearer"
+		/// @param scheme: For eg,. "Bearer"
 		/// @param token: For eg,. "Aksdtkasl2910dks"
 		public DkHttpClient SetAuthorization(string schema, string token) {
 			this.httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(schema, token);
