@@ -33,6 +33,11 @@ namespace Tool.Compet.Http {
 			return this;
 		}
 
+		public DkHttpClient SetTimeOut(int seconds = 30) {
+			this.httpClient.Timeout = TimeSpan.FromSeconds(seconds);
+			return this;
+		}
+
 		/// Sends a GET request, and return json-decoded response as `DkApiResponse`-based type.
 		public async Task<T> Get<T>(string url) where T : DkApiResponse {
 			// Perform try/catch for whole process
