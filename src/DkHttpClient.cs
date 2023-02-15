@@ -3,12 +3,11 @@ namespace Tool.Compet.Http {
 	using System.Net.Http.Headers;
 	using Tool.Compet.Core;
 	using Tool.Compet.Json;
-	using Tool.Compet.Log;
 
 	public class DkHttpClient {
 		/// HttpClient is designed for concurrency, so we just use 1 instance of it on
 		/// multiple requests instead of making new instance per request.
-		private readonly HttpClient httpClient;
+		public readonly HttpClient httpClient;
 
 		public DkHttpClient() {
 			this.httpClient = new HttpClient();
@@ -33,8 +32,10 @@ namespace Tool.Compet.Http {
 			return this;
 		}
 
-		public DkHttpClient SetTimeOut(int seconds = 30) {
-			this.httpClient.Timeout = TimeSpan.FromSeconds(seconds);
+		/// Set wait timeout for the request.
+		/// If the request wait over the timeout, the request will be cancelled.
+		public DkHttpClient SetTimeOut(TimeSpan timeout) {
+			this.httpClient.Timeout = timeout;
 			return this;
 		}
 
@@ -45,9 +46,9 @@ namespace Tool.Compet.Http {
 				// To check with larger range: !result.IsSuccessStatusCode
 				var result = await httpClient.GetAsync(url);
 				if (result.StatusCode != HttpStatusCode.OK) {
-					if (DkBuildConfig.DEBUG) {
-						DkLogs.Warning(this, $"NG response ({result.StatusCode}) when Get, reason: {result.ReasonPhrase}");
-					}
+					// if (DkBuildConfig.DEBUG) {
+					// 	DkLogs.Warning(this, $"NG response ({result.StatusCode}) when Get, reason: {result.ReasonPhrase}");
+					// }
 
 					return DkObjects.NewInstace<T>().AlsoDk(res => {
 						res.status = ((int)result.StatusCode);
@@ -60,9 +61,9 @@ namespace Tool.Compet.Http {
 				return (await result.Content.ReadFromJsonAsync<T>())!;
 			}
 			catch (Exception e) {
-				if (DkBuildConfig.DEBUG) {
-					DkLogs.Warning(this, $"Error when GET ! error: {e.Message}");
-				}
+				// if (DkBuildConfig.DEBUG) {
+				// 	DkLogs.Warning(this, $"Error when GET ! error: {e.Message}");
+				// }
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
@@ -81,18 +82,18 @@ namespace Tool.Compet.Http {
 				// To check with larger range: !result.IsSuccessStatusCode
 				var result = await httpClient.GetAsync(url);
 				if (result.StatusCode != HttpStatusCode.OK) {
-					if (DkBuildConfig.DEBUG) {
-						DkLogs.Warning(this, $"NG response ({result.StatusCode}) when GetForType, reason: {result.ReasonPhrase}");
-					}
+					// if (DkBuildConfig.DEBUG) {
+					// 	DkLogs.Warning(this, $"NG response ({result.StatusCode}) when GetForType, reason: {result.ReasonPhrase}");
+					// }
 					return null;
 				}
 
 				return await result.Content.ReadFromJsonAsync<T>();
 			}
 			catch (Exception e) {
-				if (DkBuildConfig.DEBUG) {
-					DkLogs.Warning(this, $"Error when GetForType ! error: {e.Message}");
-				}
+				// if (DkBuildConfig.DEBUG) {
+				// 	DkLogs.Warning(this, $"Error when GetForType ! error: {e.Message}");
+				// }
 
 				return null;
 			}
@@ -106,17 +107,17 @@ namespace Tool.Compet.Http {
 				// To check with larger range: !result.IsSuccessStatusCode
 				var result = await httpClient.GetAsync(url);
 				if (result.StatusCode != HttpStatusCode.OK) {
-					if (DkBuildConfig.DEBUG) {
-						DkLogs.Warning(this, $"NG response ({result.StatusCode}) when GetForString, reason: {result.ReasonPhrase}");
-					}
+					// if (DkBuildConfig.DEBUG) {
+					// 	DkLogs.Warning(this, $"NG response ({result.StatusCode}) when GetForString, reason: {result.ReasonPhrase}");
+					// }
 				}
 
 				return await result.Content.ReadAsStringAsync();
 			}
 			catch (Exception e) {
-				if (DkBuildConfig.DEBUG) {
-					DkLogs.Warning(this, $"Error when GetForString ! error: {e.Message}");
-				}
+				// if (DkBuildConfig.DEBUG) {
+				// 	DkLogs.Warning(this, $"Error when GetForString ! error: {e.Message}");
+				// }
 
 				return null;
 			}
@@ -141,9 +142,9 @@ namespace Tool.Compet.Http {
 
 				// To check with larger range: !result.IsSuccessStatusCode
 				if (response.StatusCode != HttpStatusCode.OK) {
-					if (DkBuildConfig.DEBUG) {
-						DkLogs.Warning(this, $"NG response ({response.StatusCode}) when Post, reason: {response.ReasonPhrase}");
-					}
+					// if (DkBuildConfig.DEBUG) {
+					// 	DkLogs.Warning(this, $"NG response ({response.StatusCode}) when Post, reason: {response.ReasonPhrase}");
+					// }
 
 					return DkObjects.NewInstace<T>().AlsoDk(res => {
 						res.status = ((int)response.StatusCode);
@@ -154,7 +155,7 @@ namespace Tool.Compet.Http {
 				return (await response.Content.ReadFromJsonAsync<T>())!;
 			}
 			catch (Exception e) {
-				if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when Post ! error: {e.Message}"); }
+				// if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when Post ! error: {e.Message}"); }
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
@@ -184,15 +185,15 @@ namespace Tool.Compet.Http {
 
 				// To check with larger range: !result.IsSuccessStatusCode
 				if (response.StatusCode != HttpStatusCode.OK) {
-					if (DkBuildConfig.DEBUG) {
-						DkLogs.Warning(this, $"NG response ({response.StatusCode}) when PostForType, reason: {response.ReasonPhrase}");
-					}
+					// if (DkBuildConfig.DEBUG) {
+					// 	DkLogs.Warning(this, $"NG response ({response.StatusCode}) when PostForType, reason: {response.ReasonPhrase}");
+					// }
 				}
 
 				return await response.Content.ReadFromJsonAsync<T>();
 			}
 			catch (Exception e) {
-				if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when PostForType ! error: {e.Message}"); }
+				// if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when PostForType ! error: {e.Message}"); }
 
 				return null;
 			}
@@ -217,15 +218,15 @@ namespace Tool.Compet.Http {
 
 				// To check with larger range: !result.IsSuccessStatusCode
 				if (response.StatusCode != HttpStatusCode.OK) {
-					if (DkBuildConfig.DEBUG) {
-						DkLogs.Warning(this, $"NG response ({response.StatusCode}) when PostForString, reason: {response.ReasonPhrase}");
-					}
+					// if (DkBuildConfig.DEBUG) {
+					// 	DkLogs.Warning(this, $"NG response ({response.StatusCode}) when PostForString, reason: {response.ReasonPhrase}");
+					// }
 				}
 
 				return await response.Content.ReadAsStringAsync();
 			}
 			catch (Exception e) {
-				if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when PostForString ! error: {e.Message}"); }
+				// if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when PostForString ! error: {e.Message}"); }
 
 				return null;
 			}
@@ -258,9 +259,9 @@ namespace Tool.Compet.Http {
 
 				// To check with larger range: !result.IsSuccessStatusCode
 				if (response.StatusCode != HttpStatusCode.OK) {
-					if (DkBuildConfig.DEBUG) {
-						DkLogs.Warning(this, "Send failed ! responseBody", responseBody);
-					}
+					// if (DkBuildConfig.DEBUG) {
+					// 	DkLogs.Warning(this, "Send failed ! responseBody", responseBody);
+					// }
 
 					return DkObjects.NewInstace<T>().AlsoDk(res => {
 						res.status = ((int)response.StatusCode);
@@ -271,9 +272,9 @@ namespace Tool.Compet.Http {
 				return DkJsons.ToObj<T>(responseBody!)!;
 			}
 			catch (Exception e) {
-				if (DkBuildConfig.DEBUG) {
-					DkLogs.Warning(this, $"Error when Send ! error: {e.Message}");
-				}
+				// if (DkBuildConfig.DEBUG) {
+				// 	DkLogs.Warning(this, $"Error when Send ! error: {e.Message}");
+				// }
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
