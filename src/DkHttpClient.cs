@@ -123,6 +123,28 @@ namespace Tool.Compet.Http {
 			}
 		}
 
+		public async Task<byte[]?> GetForByteArray(string url) {
+			// Perform try/catch for whole process
+			try {
+				// To check with larger range: !result.IsSuccessStatusCode
+				var result = await httpClient.GetAsync(url);
+				if (result.StatusCode != HttpStatusCode.OK) {
+					// if (DkBuildConfig.DEBUG) {
+					// 	DkLogs.Warning(this, $"NG response ({result.StatusCode}) when GetForString, reason: {result.ReasonPhrase}");
+					// }
+				}
+
+				return await result.Content.ReadAsByteArrayAsync();
+			}
+			catch (Exception e) {
+				// if (DkBuildConfig.DEBUG) {
+				// 	DkLogs.Warning(this, $"Error when GetForString ! error: {e.Message}");
+				// }
+
+				return null;
+			}
+		}
+
 		/// Sends a POST request, and return json-decoded response as `DkApiResponse`-based type.
 		/// @param body: Can be Dictionary, json-serialized object,...
 		public async Task<T> Post<T>(string url, object? body = null) where T : DkApiResponse {
