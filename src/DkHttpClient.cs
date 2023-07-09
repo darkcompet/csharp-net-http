@@ -43,27 +43,10 @@ namespace Tool.Compet.Http {
 		public async Task<T> Get<T>(string url) where T : DkApiResponse {
 			// Perform try/catch for whole process
 			try {
-				// To check with larger range: !result.IsSuccessStatusCode
-				var result = await httpClient.GetAsync(url);
-				if (result.StatusCode != HttpStatusCode.OK) {
-					// if (DkBuildConfig.DEBUG) {
-					// 	DkLogs.Warning(this, $"NG response ({result.StatusCode}) when Get, reason: {result.ReasonPhrase}");
-					// }
-
-					return DkObjects.NewInstace<T>().AlsoDk(res => {
-						res.status = ((int)result.StatusCode);
-						res.message = result.ReasonPhrase;
-					});
-				}
-
-				// Add `!` to tell compiler that body and result are non-null.
-				// Or use: return DkJsons.ToObj<T>(await result.Content.ReadAsStringAsync())!;
-				return (await result.Content.ReadFromJsonAsync<T>())!;
+				return await GetOrThrow<T>(url);
 			}
 			catch (Exception e) {
-				// if (DkBuildConfig.DEBUG) {
 				// 	DkLogs.Warning(this, $"Error when GET ! error: {e.Message}");
-				// }
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
@@ -71,6 +54,23 @@ namespace Tool.Compet.Http {
 					res.message = e.Message;
 				});
 			}
+		}
+
+		public async Task<T> GetOrThrow<T>(string url) where T : DkApiResponse {
+			// To check with larger range: !result.IsSuccessStatusCode
+			var result = await httpClient.GetAsync(url);
+			if (result.StatusCode != HttpStatusCode.OK) {
+				// 	DkLogs.Warning(this, $"NG response ({result.StatusCode}) when Get, reason: {result.ReasonPhrase}");
+
+				return DkObjects.NewInstace<T>().AlsoDk(res => {
+					res.status = ((int)result.StatusCode);
+					res.message = result.ReasonPhrase;
+				});
+			}
+
+			// Add `!` to tell compiler that body and result are non-null.
+			// Or use: return DkJsons.ToObj<T>(await result.Content.ReadAsStringAsync())!;
+			return (await result.Content.ReadFromJsonAsync<T>())!;
 		}
 
 		/// Sends a GET request, and just return json-decoded response for given type.
@@ -79,24 +79,26 @@ namespace Tool.Compet.Http {
 		public async Task<T?> GetForType<T>(string url) where T : class {
 			// Perform try/catch for whole process
 			try {
-				// To check with larger range: !result.IsSuccessStatusCode
-				var result = await httpClient.GetAsync(url);
-				if (result.StatusCode != HttpStatusCode.OK) {
-					// if (DkBuildConfig.DEBUG) {
-					// 	DkLogs.Warning(this, $"NG response ({result.StatusCode}) when GetForType, reason: {result.ReasonPhrase}");
-					// }
-					return null;
-				}
-
-				return await result.Content.ReadFromJsonAsync<T>();
+				return await GetForTypeOrThrow<T>(url);
 			}
 			catch (Exception e) {
-				// if (DkBuildConfig.DEBUG) {
 				// 	DkLogs.Warning(this, $"Error when GetForType ! error: {e.Message}");
-				// }
-
 				return null;
 			}
+		}
+
+		/// Sends a GET request, and just return json-decoded response for given type.
+		/// Take note that, returned non-null response does NOT indicate the request has succeed response.
+		/// @return Object of given type if succeed. Otherwise null.
+		public async Task<T?> GetForTypeOrThrow<T>(string url) where T : class {
+			// To check with larger range: !result.IsSuccessStatusCode
+			var result = await httpClient.GetAsync(url);
+			if (result.StatusCode != HttpStatusCode.OK) {
+				// 	DkLogs.Warning(this, $"NG response ({result.StatusCode}) when GetForType, reason: {result.ReasonPhrase}");
+				return null;
+			}
+
+			return await result.Content.ReadFromJsonAsync<T>();
 		}
 
 		/// Sends a GET request, and just response as string type.
@@ -104,45 +106,44 @@ namespace Tool.Compet.Http {
 		public async Task<string?> GetForString(string url) {
 			// Perform try/catch for whole process
 			try {
-				// To check with larger range: !result.IsSuccessStatusCode
-				var result = await httpClient.GetAsync(url);
-				if (result.StatusCode != HttpStatusCode.OK) {
-					// if (DkBuildConfig.DEBUG) {
-					// 	DkLogs.Warning(this, $"NG response ({result.StatusCode}) when GetForString, reason: {result.ReasonPhrase}");
-					// }
-				}
-
-				return await result.Content.ReadAsStringAsync();
+				return await GetForStringOrThrow(url);
 			}
 			catch (Exception e) {
-				// if (DkBuildConfig.DEBUG) {
 				// 	DkLogs.Warning(this, $"Error when GetForString ! error: {e.Message}");
-				// }
-
 				return null;
 			}
 		}
 
-		public async Task<byte[]?> GetForByteArray(string url) {
-			// Perform try/catch for whole process
-			try {
-				// To check with larger range: !result.IsSuccessStatusCode
-				var result = await httpClient.GetAsync(url);
-				if (result.StatusCode != HttpStatusCode.OK) {
-					// if (DkBuildConfig.DEBUG) {
-					// 	DkLogs.Warning(this, $"NG response ({result.StatusCode}) when GetForString, reason: {result.ReasonPhrase}");
-					// }
-				}
+		/// Sends a GET request, and just response as string type.
+		/// @return Nullable body in string.
+		public async Task<string?> GetForStringOrThrow(string url) {
+			// To check with larger range: !result.IsSuccessStatusCode
+			var result = await httpClient.GetAsync(url);
+			if (result.StatusCode != HttpStatusCode.OK) {
+				// 	DkLogs.Warning(this, $"NG response ({result.StatusCode}) when GetForString, reason: {result.ReasonPhrase}");
+			}
 
-				return await result.Content.ReadAsByteArrayAsync();
+			return await result.Content.ReadAsStringAsync();
+		}
+
+		public async Task<byte[]?> GetForByteArray(string url) {
+			try {
+				return await GetForByteArrayOrThrow(url);
 			}
 			catch (Exception e) {
-				// if (DkBuildConfig.DEBUG) {
 				// 	DkLogs.Warning(this, $"Error when GetForString ! error: {e.Message}");
-				// }
-
 				return null;
 			}
+		}
+
+		public async Task<byte[]?> GetForByteArrayOrThrow(string url) {
+			// To check with larger range: !result.IsSuccessStatusCode
+			var result = await httpClient.GetAsync(url);
+			if (result.StatusCode != HttpStatusCode.OK) {
+				// 	DkLogs.Warning(this, $"NG response ({result.StatusCode}) when GetForString, reason: {result.ReasonPhrase}");
+			}
+
+			return await result.Content.ReadAsByteArrayAsync();
 		}
 
 		/// Sends a POST request, and return json-decoded response as `DkApiResponse`-based type.
@@ -150,34 +151,10 @@ namespace Tool.Compet.Http {
 		public async Task<T> Post<T>(string url, object? body = null) where T : DkApiResponse {
 			// Perform try/catch for whole process
 			try {
-				var json = body == null ? null : DkJsons.ToJson(body);
-
-				// Other content types:
-				// - StreamContent
-				// - ByteArrayContent (StringContent, FormUrlEncodedContent)
-				// - MultipartContent (MultipartFormDataContent)
-				var stringContent = json == null ? null : new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-				var response = await httpClient.PostAsync(url, stringContent);
-
-				// // For ASP.NET environment:
-				// var response = await httpClient.PostAsJsonAsync(url, body);
-
-				// To check with larger range: !result.IsSuccessStatusCode
-				if (response.StatusCode != HttpStatusCode.OK) {
-					// if (DkBuildConfig.DEBUG) {
-					// 	DkLogs.Warning(this, $"NG response ({response.StatusCode}) when Post, reason: {response.ReasonPhrase}");
-					// }
-
-					return DkObjects.NewInstace<T>().AlsoDk(res => {
-						res.status = ((int)response.StatusCode);
-						res.message = response.ReasonPhrase;
-					});
-				}
-
-				return (await response.Content.ReadFromJsonAsync<T>())!;
+				return await PostOrThrow<T>(url, body);
 			}
 			catch (Exception e) {
-				// if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when Post ! error: {e.Message}"); }
+				// DkLogs.Warning(this, $"Error when Post ! error: {e.Message}");
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
@@ -187,71 +164,105 @@ namespace Tool.Compet.Http {
 			}
 		}
 
+		/// Sends a POST request, and return json-decoded response as `DkApiResponse`-based type.
+		/// @param body: Can be Dictionary, json-serialized object,...
+		public async Task<T> PostOrThrow<T>(string url, object? body = null) where T : DkApiResponse {
+			var json = body == null ? null : DkJsons.ToJson(body);
+
+			// Other content types:
+			// - StreamContent
+			// - ByteArrayContent (StringContent, FormUrlEncodedContent)
+			// - MultipartContent (MultipartFormDataContent)
+			var stringContent = json == null ? null : new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+			var response = await httpClient.PostAsync(url, stringContent);
+
+			// // For ASP.NET environment:
+			// var response = await httpClient.PostAsJsonAsync(url, body);
+
+			// To check with larger range: !result.IsSuccessStatusCode
+			if (response.StatusCode != HttpStatusCode.OK) {
+				// 	DkLogs.Warning(this, $"NG response ({response.StatusCode}) when Post, reason: {response.ReasonPhrase}");
+
+				return DkObjects.NewInstace<T>().AlsoDk(res => {
+					res.status = ((int)response.StatusCode);
+					res.message = response.ReasonPhrase;
+				});
+			}
+
+			return (await response.Content.ReadFromJsonAsync<T>())!;
+		}
+
 		/// Sends a POST request, and return json-decoded response as given type.
 		/// @param body: Can be Dictionary, json-serialized object,...
 		/// @return Nullable object in given type.
 		public async Task<T?> PostForType<T>(string url, object? body = null) where T : class {
 			// Perform try/catch for whole process
 			try {
-				var json = body == null ? null : DkJsons.ToJson(body);
-
-				// Other content types:
-				// - StreamContent
-				// - ByteArrayContent (StringContent, FormUrlEncodedContent)
-				// - MultipartContent (MultipartFormDataContent)
-				var stringContent = json == null ? null : new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-				var response = await httpClient.PostAsync(url, stringContent);
-
-				// // For ASP.NET environment:
-				// var response = await httpClient.PostAsJsonAsync(url, body);
-
-				// To check with larger range: !result.IsSuccessStatusCode
-				if (response.StatusCode != HttpStatusCode.OK) {
-					// if (DkBuildConfig.DEBUG) {
-					// 	DkLogs.Warning(this, $"NG response ({response.StatusCode}) when PostForType, reason: {response.ReasonPhrase}");
-					// }
-				}
-
-				return await response.Content.ReadFromJsonAsync<T>();
+				return await PostForTypeOrThrow<T>(url, body);
 			}
 			catch (Exception e) {
-				// if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when PostForType ! error: {e.Message}"); }
+				// DkLogs.Warning(this, $"Error when PostForType ! error: {e.Message}");
+				return null;
+			}
+		}
 
+		/// Sends a POST request, and return json-decoded response as given type.
+		/// @param body: Can be Dictionary, json-serialized object,...
+		/// @return Nullable object in given type.
+		public async Task<T?> PostForTypeOrThrow<T>(string url, object? body = null) where T : class {
+			var json = body == null ? null : DkJsons.ToJson(body);
+
+			// Other content types:
+			// - StreamContent
+			// - ByteArrayContent (StringContent, FormUrlEncodedContent)
+			// - MultipartContent (MultipartFormDataContent)
+			var stringContent = json == null ? null : new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+			var response = await httpClient.PostAsync(url, stringContent);
+
+			// // For ASP.NET environment:
+			// var response = await httpClient.PostAsJsonAsync(url, body);
+
+			// To check with larger range: !result.IsSuccessStatusCode
+			if (response.StatusCode != HttpStatusCode.OK) {
+				// 	DkLogs.Warning(this, $"NG response ({response.StatusCode}) when PostForType, reason: {response.ReasonPhrase}");
+			}
+
+			return await response.Content.ReadFromJsonAsync<T>();
+		}
+
+		/// Sends a POST request, and return just response as string type.
+		/// @param body: Can be Dictionary, json-serialized object,...
+		public async Task<string?> PostForString(string url, object? body = null) {
+			try {
+				return await PostForStringOrThrow(url, body);
+			}
+			catch (Exception e) {
+				// DkLogs.Warning(this, $"Error when PostForString ! error: {e.Message}");
 				return null;
 			}
 		}
 
 		/// Sends a POST request, and return just response as string type.
 		/// @param body: Can be Dictionary, json-serialized object,...
-		public async Task<string?> PostForString(string url, object? body = null) {
-			// Perform try/catch for whole process
-			try {
-				var json = body == null ? null : DkJsons.ToJson(body);
+		public async Task<string?> PostForStringOrThrow(string url, object? body = null) {
+			var json = body == null ? null : DkJsons.ToJson(body);
 
-				// Other content types:
-				// - StreamContent
-				// - ByteArrayContent (StringContent, FormUrlEncodedContent)
-				// - MultipartContent (MultipartFormDataContent)
-				var stringContent = json == null ? null : new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-				var response = await httpClient.PostAsync(url, stringContent);
+			// Other content types:
+			// - StreamContent
+			// - ByteArrayContent (StringContent, FormUrlEncodedContent)
+			// - MultipartContent (MultipartFormDataContent)
+			var stringContent = json == null ? null : new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+			var response = await httpClient.PostAsync(url, stringContent);
 
-				// // For ASP.NET environment:
-				// var response = await httpClient.PostAsJsonAsync(url, body);
+			// // For ASP.NET environment:
+			// var response = await httpClient.PostAsJsonAsync(url, body);
 
-				// To check with larger range: !result.IsSuccessStatusCode
-				if (response.StatusCode != HttpStatusCode.OK) {
-					// if (DkBuildConfig.DEBUG) {
-					// 	DkLogs.Warning(this, $"NG response ({response.StatusCode}) when PostForString, reason: {response.ReasonPhrase}");
-					// }
-				}
-
-				return await response.Content.ReadAsStringAsync();
+			// To check with larger range: !result.IsSuccessStatusCode
+			if (response.StatusCode != HttpStatusCode.OK) {
+				// 	DkLogs.Warning(this, $"NG response ({response.StatusCode}) when PostForString, reason: {response.ReasonPhrase}");
 			}
-			catch (Exception e) {
-				// if (DkBuildConfig.DEBUG) { DkLogs.Warning(this, $"Error when PostForString ! error: {e.Message}"); }
 
-				return null;
-			}
+			return await response.Content.ReadAsStringAsync();
 		}
 
 		/// Still in development !!
