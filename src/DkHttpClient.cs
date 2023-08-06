@@ -50,7 +50,6 @@ namespace Tool.Compet.Http {
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
-					res.code = "dkerror";
 					res.message = e.Message;
 				});
 			}
@@ -125,30 +124,9 @@ namespace Tool.Compet.Http {
 			return await response.Content.ReadAsStringAsync();
 		}
 
-		// public async Task<byte[]?> GetForByteArray(string url) {
-		// 	try {
-		// 		return await GetForByteArrayOrThrow(url);
-		// 	}
-		// 	catch (Exception e) {
-		// 		// 	DkLogs.Warning(this, $"Error when GetForString ! error: {e.Message}");
-		// 		return null;
-		// 	}
-		// }
-
-		// public async Task<byte[]?> GetForByteArrayOrThrow(string url) {
-		// 	// To check with larger range: !result.IsSuccessStatusCode
-		// 	var response = await this.GetRawAsync(url);
-		// 	if (response.StatusCode != HttpStatusCode.OK) {
-		// 		// 	DkLogs.Warning(this, $"NG response ({result.StatusCode}) when GetForString, reason: {result.ReasonPhrase}");
-		// 	}
-
-		// 	return await response.Content.ReadAsByteArrayAsync();
-		// }
-
 		/// Sends a GET request, and get raw response.
-		/// @return Nullable body in string.
+		/// @return Raw response so caller can read with various format (byte, string, json, stream, ...).
 		public async Task<HttpResponseMessage> GetRawAsync(string url) {
-			// To check with larger range: !response.IsSuccessStatusCode
 			return await this.httpClient.GetAsync(url);
 		}
 
@@ -157,14 +135,13 @@ namespace Tool.Compet.Http {
 		public async Task<T> PostAsync<T>(string url, object? body = null) where T : DkApiResponse {
 			// Perform try/catch for whole process
 			try {
-				return await PostOrThrowAsync<T>(url, body);
+				return await this.PostOrThrowAsync<T>(url, body);
 			}
 			catch (Exception e) {
 				// DkLogs.Warning(this, $"Error when Post ! error: {e.Message}");
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
-					res.code = "dkerror";
 					res.message = e.Message;
 				});
 			}
@@ -234,6 +211,7 @@ namespace Tool.Compet.Http {
 
 		/// Sends a POST request with payload as json, and return raw response.
 		/// @param body: Can be Dictionary, json-serialized object,...
+		/// @return Raw response so caller can read with various format (byte, string, json, stream, ...).
 		public async Task<HttpResponseMessage> PostRawAsync(string url, object? body = null) {
 			var json = body == null ? null : DkJsons.ToJson(body);
 
@@ -242,12 +220,11 @@ namespace Tool.Compet.Http {
 			// - ByteArrayContent (StringContent, FormUrlEncodedContent)
 			// - MultipartContent (MultipartFormDataContent)
 			var stringContent = json == null ? null : new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-			var response = await httpClient.PostAsync(url, stringContent);
+			var response = await this.httpClient.PostAsync(url, stringContent);
 
 			// // For ASP.NET environment:
 			// var response = await httpClient.PostAsJsonAsync(url, body);
 
-			// // To check with larger range: !result.IsSuccessStatusCode
 			// if (response.StatusCode != HttpStatusCode.OK) {
 			// 	// 	DkLogs.Warning(this, $"NG response ({response.StatusCode}) when PostForString, reason: {response.ReasonPhrase}");
 			// }
@@ -275,7 +252,7 @@ namespace Tool.Compet.Http {
 					},
 			};
 
-			return await httpClient.SendAsync(request, completionOption, cancellationToken);
+			return await this.httpClient.SendAsync(request, completionOption, cancellationToken);
 		}
 	}
 }
