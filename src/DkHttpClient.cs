@@ -50,7 +50,7 @@ namespace Tool.Compet.Http {
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
-					res.message = e.Message;
+					res.msg = e.Message;
 				});
 			}
 		}
@@ -63,7 +63,7 @@ namespace Tool.Compet.Http {
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = ((int)response.StatusCode);
-					res.message = response.ReasonPhrase;
+					res.msg = response.ReasonPhrase;
 				});
 			}
 
@@ -142,7 +142,7 @@ namespace Tool.Compet.Http {
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = 0;
-					res.message = e.Message;
+					res.msg = e.Message;
 				});
 			}
 		}
@@ -161,7 +161,7 @@ namespace Tool.Compet.Http {
 
 				return DkObjects.NewInstace<T>().AlsoDk(res => {
 					res.status = ((int)response.StatusCode);
-					res.message = response.ReasonPhrase;
+					res.msg = response.ReasonPhrase;
 				});
 			}
 
